@@ -106,8 +106,3 @@ io.on('connection', (socket) => {
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
-
-// Start the server
-server.listen(port, () => {
-    console.log(`Server listening at http://localhost:${port}`);
-});
