@@ -73,7 +73,6 @@ app.get('/download-csv', async (req, res) => {
 });
 
 // Create HTTP server and bind the express app to it, along with websocket
-const server = http.createServer(app);
 const io = socketIo(server);
 
 // Listen for new connections on WebSocket
