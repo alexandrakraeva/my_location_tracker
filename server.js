@@ -4,6 +4,8 @@ const socketIo = require('socket.io');
 const admin = require('firebase-admin');
 const path = require('path');
 const { Parser } = require('json2csv'); // Add json2csv package to convert JSON to CSV
+const app = express();
+
 const server = http.createServer(app);
 
 
@@ -15,7 +17,7 @@ admin.initializeApp({
 const db = admin.firestore(); // Get a Firestore instance
 
 // Initialize express app
-const app = express();
+
 const port = process.env.PORT || 3000;
 server.listen(port, () => {
     console.log(`Server running on port ${port}`);
