@@ -1,6 +1,7 @@
 ﻿const socket = io(); // connection to server through WebSocketing
 let map; // variable that holds map obj
 let marker; // variable that holds map marker
+let polylinePath = [];
 let sessionId;
 
 socket.on('sessionInit', (data) => {
@@ -148,10 +149,29 @@ function updateLocation() {
             map.setCenter(pos);
             socket.emit('locationUpdate', { latitude: pos.lat, longitude: pos.lng });
 
+            polylinePath.push(pos);
 
+            updatePolyline();
         });
     }
 }
+
+
+function updatePolyline() {
+    if (!window.polyline) {
+        window.polyline = new google.maps.Polyline({
+            path: polylinePath,
+            geodesic: true,
+            strokeColor: '#FF0000',
+            strokeOpacity: 1.0,
+            strokeWeight: 2,
+            map: map,
+        });
+    } else {
+        window.polyline.setPath(polylinePath);
+    }
+}
+
 
 // click-evet listener to the save button to save .csv
 document.getElementById('saveButton').addEventListener('click', () => {
