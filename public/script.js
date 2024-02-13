@@ -4,11 +4,11 @@ let marker; // variable that holds map marker
 let sessionId;
 
 socket.on('sessionInit', (data) => {
-    sessionId = data.sessionId; // Store the session ID
+    sessionId = data.sessionId; // store the session ID
 });
 
 function initMap() {
-    // Define the style of the map (Google Maps API)
+    // the style of the map (Google Maps API)
     const blackWhiteStyle = [
         { elementType: 'geometry', stylers: [{ color: '#f5f5f5' }] },
         { elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
@@ -86,14 +86,14 @@ function initMap() {
         },
     ];
 
-    // Initialize + Apply style from above
+    // initialize + apply style from above
     map = new google.maps.Map(document.getElementById("map"), {
         center: { lat: 41.390205, lng: 2.154007 },
         zoom: 18,
         styles: blackWhiteStyle,
     });
 
-    // Hide Google Maps controllers for cleaner view of the map
+    // hide Google Maps controllers for cleaner view of the map
     map.setOptions({
         zoomControl: false,
         streetViewControl: false,
@@ -101,21 +101,21 @@ function initMap() {
         fullscreenControl: false
     });
 
-    // Target HTML to display "Loading..." first
+    // target HTML to display "Loading..." first
     const overlay = document.getElementById('overlay');
     overlay.innerHTML = '<div class="loading-spinner"></div><div class="loading-text">Loading...</div>';
 }
 
 
 function updateLocation() {
-    if (navigator.geolocation) { // Check if browser supports geolocation
+    if (navigator.geolocation) { // check if browser supports geolocation
         navigator.geolocation.getCurrentPosition((position) => {
             const pos = {
                 lat: position.coords.latitude,
                 lng: position.coords.longitude,
             };
 
-            // Define style of Location Marker
+            // define style of Location Marker
             const blackCircleIcon = {
                 path: google.maps.SymbolPath.CIRCLE,
                 scale: 7,
@@ -125,7 +125,7 @@ function updateLocation() {
                 strokeColor: "#FFFFFF",
             };
 
-            // Check if marker exists -> update the pos
+            // check if marker exists -> update the pos
             if (!marker) {
                 marker = new google.maps.Marker({
                     position: pos,
@@ -137,7 +137,7 @@ function updateLocation() {
                 marker.setIcon(blackCircleIcon);
             }
 
-            // Fades out initial "Loading..." when the first coordinates are recieved
+            // fades out initial "Loading..." when the first coordinates are recieved
             const overlay = document.getElementById('overlay');
             overlay.style.opacity = '0';
 
@@ -153,13 +153,16 @@ function updateLocation() {
     }
 }
 
+// click-evet listener to the save button to save .csv
 document.getElementById('saveButton').addEventListener('click', () => {
     if (!sessionId) {
         alert('Session not initialized. Please refresh the page.');
         return;
     }
-    window.location.href = `/download-csv?sessionId=${sessionId}`; // Append session ID as query parameter
+    window.location.href = `/download-csv?sessionId=${sessionId}`; // append session ID
 });
 
+
+///////
 initMap();
-setInterval(updateLocation, 10000); // Updates location each 10 sec
+setInterval(updateLocation, 10000); // updates location each 10 sec

@@ -39,30 +39,29 @@
 }
 
 .container {
-    display: flex; /* Use Flexbox */
-    flex-direction: column; /* Stack children vertically */
-    align-items: center; /* Center children horizontally */
-    justify-content: center; /* Center children vertically */
-    height: 100vh; /* Take full height of the viewport */
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: center; 
+    height: 100vh; 
 }
 
-/* Updated styles for #map */
+
 #map {
-    height: 50vh; /* Adjust the height to maintain a square aspect ratio based on your preference */
-    width: 50vh; /* Width and height are the same for a square */
-    /* Removed margin, position, top, and transform properties */
+    height: 50vh; 
+    width: 50vh; 
+    
 }
 
-/* Styles for the save button */
+
 #saveButton {
-    width: 50vh; /* Match the width of the map to align the button under the map */
-    margin-top: 20px; /* Add some space between the map and the button */
-    padding: 10px 0; /* Add some padding for better aesthetics */
-    background-color: black; /* Set the button background to black */
-    color: white; /* Set the text color to white */
-    border: none; /* Remove the default border */
-    cursor: pointer; /* Change the cursor to pointer to indicate it's clickable */
-    font-family: 'Helvetica', sans-serif; /* Set the font to Helvetica */
-    font-size: 16px; /* Adjust the font size as needed */
-    /* Ensured display: block; and other centering properties are not needed here due to Flexbox */
+    width: 50vh; 
+    margin-top: 20px; 
+    padding: 10px 0;
+    background-color: black; 
+    color: white; 
+    border: none; 
+    cursor: pointer; 
+    font-family: 'Helvetica', sans-serif; 
+    font-size: 16px; 
 }
