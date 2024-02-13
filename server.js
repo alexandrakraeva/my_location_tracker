@@ -4,7 +4,6 @@ const socketIo = require('socket.io');
 const admin = require('firebase-admin');
 const path = require('path');
 const { Parser } = require('json2csv'); // Add json2csv package to convert JSON to CSV
-const http = require('http');
 const server = http.createServer(app);
 
 
