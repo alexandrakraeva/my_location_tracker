@@ -1,7 +1,7 @@
-﻿const express = require('express'); // framework to create server
+﻿server.js
+const express = require('express'); // framework to create server
 const http = require('http'); //moule to create http server
 const socketIo = require('socket.io'); // websocketing
-const bodyParser = require('body-parser');
 const admin = require('firebase-admin'); //firebase servises - database
 const path = require('path'); // to transform file path
 const { Parser } = require('json2csv'); // convert json to csv to save
