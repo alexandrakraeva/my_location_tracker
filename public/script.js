@@ -163,13 +163,10 @@ function updateLocation() {
     }
 }
 
-// click-evet listener to the save button to save .csv
+// to the save button to save .csv
 document.getElementById('saveButton').addEventListener('click', () => {
-    if (!sessionId) {
-        alert('Session not initialized. Please refresh the page.');
-        return;
-    }
-    window.location.href = `/download-csv?sessionId=${sessionId}`; // append session ID
+    // Logic to trigger CSV download, potentially by redirecting to the '/download-csv' endpoint
+    window.location.href = '/download-csv'; // This might need parameters or session handling
 });
 
 
