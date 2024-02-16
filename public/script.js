@@ -1,99 +1,16 @@
-﻿const socket = io(); // connection to server through WebSocketing
-let map; // variable that holds map obj
-let marker; // variable that holds map marker
-let sessionId;
-
-socket.on('sessionInit', (data) => {
-    sessionId = data.sessionId; // store the session ID
-});
+﻿const socket = io(); // Connection to server through WebSocket
+let map; // Variable that holds map object
+let marker; // Variable that holds map marker
 
 function initMap() {
-    // the style of the map (Google Maps API)
-    const blackWhiteStyle = [
-        { elementType: 'geometry', stylers: [{ color: '#f5f5f5' }] },
-        { elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
-        { elementType: 'labels.text.fill', stylers: [{ color: '#616161' }] },
-        { elementType: 'labels.text.stroke', stylers: [{ color: '#f5f5f5' }] },
-        {
-            featureType: 'administrative.land_parcel',
-            elementType: 'labels.text.fill',
-            stylers: [{ color: '#bdbdbd' }],
-        },
-        {
-            featureType: 'poi',
-            elementType: 'geometry',
-            stylers: [{ color: '#eeeeee' }],
-        },
-        {
-            featureType: 'poi',
-            elementType: 'labels.text.fill',
-            stylers: [{ color: '#757575' }],
-        },
-        {
-            featureType: 'poi.park',
-            elementType: 'geometry',
-            stylers: [{ color: '#e5e5e5' }],
-        },
-        {
-            featureType: 'poi.park',
-            elementType: 'labels.text.fill',
-            stylers: [{ color: '#9e9e9e' }],
-        },
-        {
-            featureType: 'road',
-            elementType: 'geometry',
-            stylers: [{ color: '#ffffff' }],
-        },
-        {
-            featureType: 'road.arterial',
-            elementType: 'labels.text.fill',
-            stylers: [{ color: '#757575' }],
-        },
-        {
-            featureType: 'road.highway',
-            elementType: 'geometry',
-            stylers: [{ color: '#dadada' }],
-        },
-        {
-            featureType: 'road.highway',
-            elementType: 'labels.text.fill',
-            stylers: [{ color: '#616161' }],
-        },
-        {
-            featureType: 'road.local',
-            elementType: 'labels.text.fill',
-            stylers: [{ color: '#9e9e9e' }],
-        },
-        {
-            featureType: 'transit.line',
-            elementType: 'geometry',
-            stylers: [{ color: '#e5e5e5' }],
-        },
-        {
-            featureType: 'transit.station',
-            elementType: 'geometry',
-            stylers: [{ color: '#eeeeee' }],
-        },
-        {
-            featureType: 'water',
-            elementType: 'geometry',
-            stylers: [{ color: '#c9c9c9' }],
-        },
-        {
-            featureType: 'water',
-            elementType: 'labels.text.fill',
-            stylers: [{ color: '#9e9e9e' }],
-        },
-    ];
+    const blackWhiteStyle = [/* Your map style array */];
 
-    // initialize + apply style from above
     map = new google.maps.Map(document.getElementById("map"), {
-        center: { lat: 41.390205, lng: 2.154007 },
+        center: { lat: 41.390205, lng: 2.154007 }, // Default center
         zoom: 18,
         styles: blackWhiteStyle,
     });
 
-    // hide Google Maps controllers for cleaner view of the map
     map.setOptions({
         zoomControl: false,
         streetViewControl: false,
@@ -101,21 +18,20 @@ function initMap() {
         fullscreenControl: false
     });
 
-    // target HTML to display "Loading..." first
+    // Initial loading overlay
     const overlay = document.getElementById('overlay');
     overlay.innerHTML = '<div class="loading-spinner"></div><div class="loading-text">Loading...</div>';
 }
 
-
 function updateLocation() {
-    if (navigator.geolocation) { // check if browser supports geolocation
+    if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((position) => {
             const pos = {
                 lat: position.coords.latitude,
                 lng: position.coords.longitude,
             };
 
-            // define style of Location Marker
+            // Marker style
             const blackCircleIcon = {
                 path: google.maps.SymbolPath.CIRCLE,
                 scale: 7,
@@ -125,7 +41,6 @@ function updateLocation() {
                 strokeColor: "#FFFFFF",
             };
 
-            // check if marker exists -> update the pos
             if (!marker) {
                 marker = new google.maps.Marker({
                     position: pos,
@@ -137,32 +52,21 @@ function updateLocation() {
                 marker.setIcon(blackCircleIcon);
             }
 
-            // fades out initial "Loading..." when the first coordinates are recieved
+            // Remove loading overlay
             const overlay = document.getElementById('overlay');
             overlay.style.opacity = '0';
-
-            overlay.addEventListener('transitionend', function () {
-                overlay.style.display = 'none';
-            }, { once: true });
+            overlay.addEventListener('transitionend', () => overlay.style.display = 'none', { once: true });
 
             map.setCenter(pos);
+
+            // Emit location update to server
             socket.emit('locationUpdate', { latitude: pos.lat, longitude: pos.lng });
-
-
         });
+    } else {
+        console.error("Geolocation is not supported by this browser.");
     }
 }
 
-// click-evet listener to the save button to save .csv
-document.getElementById('saveButton').addEventListener('click', () => {
-    if (!sessionId) {
-        alert('Session not initialized. Please refresh the page.');
-        return;
-    }
-    window.location.href = `/download-csv?sessionId=${sessionId}`; // append session ID
-});
-
-
-///////
+// Initialize map and set interval for location updates
 initMap();
-setInterval(updateLocation, 3000); // updates location each 10 sec
+setInterval(updateLocation, 10000); // Update location every 10 seconds
