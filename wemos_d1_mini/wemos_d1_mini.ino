@@ -1,11 +1,3 @@
-#include <ESP8266WiFi.h>
-
-const char* ssid = "Iphone (Sasha)"; // Replace with your WiFi SSID
-const char* password = "sashakraeva1"; // Replace with your WiFi password
-
-const char* serverUrl = "https://xref-my-lockation-tracker-ffdc2f2f433d.herokuapp.com"; // Replace with your server's URL
-const int httpPort = 80; // or 443 for HTTPS
-
 #include <Wire.h>
 #include <BH1750.h>
 #include <TM1637Display.h>
@@ -27,16 +19,7 @@ void setup() {
 
   display.setBrightness(0x0f); // Set the display to maximum brightness
   Serial.println(F("BH1750 and TM1637 Integration Test"));
-
-
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
-  Serial.println("WiFi connected");
 }
-
 
 void loop() {
   float lux = lightMeter.readLightLevel(); // Read light level in lux
@@ -48,19 +31,5 @@ void loop() {
   int displayValue = (int)lux; // Convert lux to an integer value for display
   display.showNumberDec(displayValue, false); // Display the value, with leading zeros disabled
 
-  if (WiFi.status() == WL_CONNECTED) {
-    WiFiClient client;
-    if (client.connect(serverUrl, httpPort)) {
-      String url = "/api/lux"; // API endpoint for sending lux values
-      client.print(String("POST ") + url + " HTTP/1.1\r\n" +
-                   "Host: " + serverUrl + "\r\n" +
-                   "Content-Type: application/x-www-form-urlencoded\r\n" +
-                   "Connection: close\r\n" +
-                   "Content-Length: " + String(String("lux=").length() + String(lux).length()) + "\r\n" +
-                   "\r\n" +
-                   "lux=" + String(lux));
-    }
-  }
-
-  delay(10000); // Adjust based on your needs
+  delay(1000); // Update the display every second
 }
