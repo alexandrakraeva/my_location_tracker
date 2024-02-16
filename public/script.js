@@ -3,8 +3,84 @@ let map; // Variable that holds map object
 let marker; // Variable that holds map marker
 
 function initMap() {
-    const blackWhiteStyle = [/* Your map style array */];
+    const blackWhiteStyle = [
+        { elementType: 'geometry', stylers: [{ color: '#f5f5f5' }] },
+        { elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
+        { elementType: 'labels.text.fill', stylers: [{ color: '#616161' }] },
+        { elementType: 'labels.text.stroke', stylers: [{ color: '#f5f5f5' }] },
+        {
+            featureType: 'administrative.land_parcel',
+            elementType: 'labels.text.fill',
+            stylers: [{ color: '#bdbdbd' }],
+        },
+        {
+            featureType: 'poi',
+            elementType: 'geometry',
+            stylers: [{ color: '#eeeeee' }],
+        },
+        {
+            featureType: 'poi',
+            elementType: 'labels.text.fill',
+            stylers: [{ color: '#757575' }],
+        },
+        {
+            featureType: 'poi.park',
+            elementType: 'geometry',
+            stylers: [{ color: '#e5e5e5' }],
+        },
+        {
+            featureType: 'poi.park',
+            elementType: 'labels.text.fill',
+            stylers: [{ color: '#9e9e9e' }],
+        },
+        {
+            featureType: 'road',
+            elementType: 'geometry',
+            stylers: [{ color: '#ffffff' }],
+        },
+        {
+            featureType: 'road.arterial',
+            elementType: 'labels.text.fill',
+            stylers: [{ color: '#757575' }],
+        },
+        {
+            featureType: 'road.highway',
+            elementType: 'geometry',
+            stylers: [{ color: '#dadada' }],
+        },
+        {
+            featureType: 'road.highway',
+            elementType: 'labels.text.fill',
+            stylers: [{ color: '#616161' }],
+        },
+        {
+            featureType: 'road.local',
+            elementType: 'labels.text.fill',
+            stylers: [{ color: '#9e9e9e' }],
+        },
+        {
+            featureType: 'transit.line',
+            elementType: 'geometry',
+            stylers: [{ color: '#e5e5e5' }],
+        },
+        {
+            featureType: 'transit.station',
+            elementType: 'geometry',
+            stylers: [{ color: '#eeeeee' }],
+        },
+        {
+            featureType: 'water',
+            elementType: 'geometry',
+            stylers: [{ color: '#c9c9c9' }],
+        },
+        {
+            featureType: 'water',
+            elementType: 'labels.text.fill',
+            stylers: [{ color: '#9e9e9e' }],
+        },
+    ];
 
+    // initialize + apply style from above
     map = new google.maps.Map(document.getElementById("map"), {
         center: { lat: 41.390205, lng: 2.154007 }, // Default center
         zoom: 18,
@@ -67,6 +143,22 @@ function updateLocation() {
     }
 }
 
+document.getElementById('saveButton').addEventListener('click', () => {
+    const thingSpeakChannelId = 2435543; // Replace with your actual ThingSpeak Channel ID
+    const apiKey = 'RKJ773VUWA0MM5GF'; // Optional: Include only if your channel is private
+
+    // Construct the URL for CSV download
+    let downloadUrl = `https://api.thingspeak.com/channels/${thingSpeakChannelId}/feeds.csv?api_key=${apiKey}&results=8000`;
+
+    // Create a temporary link to programmatically click for download
+    const tempLink = document.createElement('a');
+    tempLink.href = downloadUrl;
+    tempLink.setAttribute('download', `channel_${thingSpeakChannelId}_data.csv`);
+    document.body.appendChild(tempLink);
+    tempLink.click();
+    document.body.removeChild(tempLink);
+});
+
 // Initialize map and set interval for location updates
 initMap();
-setInterval(updateLocation, 10000); // Update location every 10 seconds
+setInterval(updateLocation, 3000); // Update location every 3 seconds
