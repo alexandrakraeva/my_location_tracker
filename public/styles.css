@@ -4,8 +4,8 @@
     height: 100vh;
     background-color: black;
     z-index: 100;
-    transition: opacity 1s ease-out; 
-    opacity: 1; 
+    transition: opacity 1s ease-out;
+    opacity: 1;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -13,8 +13,8 @@
 }
 
 .loading-spinner {
-    border: 5px solid #f3f3f3; 
-    border-top: 5px solid #000000; 
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #000000;
     border-radius: 50%;
     width: 50px;
     height: 50px;
@@ -39,29 +39,28 @@
 }
 
 .container {
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    justify-content: center; 
-    height: 100vh; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
 }
 
 
 #map {
-    height: 50vh; 
-    width: 50vh; 
-    
+    height: 50vh;
+    width: 50vh;
 }
 
 
 #saveButton {
-    width: 50vh; 
-    margin-top: 20px; 
+    width: 50vh;
+    margin-top: 20px;
     padding: 10px 0;
-    background-color: black; 
-    color: white; 
-    border: none; 
-    cursor: pointer; 
-    font-family: 'Helvetica', sans-serif; 
-    font-size: 16px; 
+    background-color: black;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-family: 'Helvetica', sans-serif;
+    font-size: 16px;
 }

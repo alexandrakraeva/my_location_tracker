@@ -162,5 +162,7 @@ document.getElementById('saveButton').addEventListener('click', () => {
     window.location.href = `/download-csv?sessionId=${sessionId}`; // append session ID
 });
 
+
+///////
 initMap();
 setInterval(updateLocation, 10000); // updates location each 10 sec
