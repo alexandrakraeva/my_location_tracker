@@ -1,8 +1,11 @@
 ﻿const socket = io(); // connection to server through WebSocketing
 let map; // variable that holds map obj
 let marker; // variable that holds map marker
+let sessionId;
 
-
+socket.on('sessionInit', (data) => {
+    sessionId = data.sessionId; // store the session ID
+});
 
 function initMap() {
     // the style of the map (Google Maps API)
@@ -110,7 +113,6 @@ function updateLocation() {
             const pos = {
                 lat: position.coords.latitude,
                 lng: position.coords.longitude,
-                timestamp: new Date().toISOString() // Add timestamp
             };
 
             // define style of Location Marker
@@ -144,32 +146,21 @@ function updateLocation() {
             }, { once: true });
 
             map.setCenter(pos);
+            socket.emit('locationUpdate', { latitude: pos.lat, longitude: pos.lng });
 
-            fetch('/api/location-update', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(pos),
-            })
-                .then(response => response.json())
-                .then(data => console.log('Location update successful:', data))
-                .catch((error) => console.error('Error updating location:', error));
-        }, (error) => {
-            console.error('Error getting location:', error);
+
         });
-    } else {
-        console.error('Geolocation is not supported by this browser.');
     }
 }
 
-// to the save button to save .csv
+// click-evet listener to the save button to save .csv
 document.getElementById('saveButton').addEventListener('click', () => {
-    // Logic to trigger CSV download, potentially by redirecting to the '/download-csv' endpoint
-    window.location.href = '/download-csv'; // This might need parameters or session handling
+    if (!sessionId) {
+        alert('Session not initialized. Please refresh the page.');
+        return;
+    }
+    window.location.href = `/download-csv?sessionId=${sessionId}`; // append session ID
 });
 
-
-///////
 initMap();
-setInterval(updateLocation, 3000); // updates location each 10 sec
+setInterval(updateLocation, 3000); // updates location each 3 sec
