@@ -1,11 +1,6 @@
 ﻿const socket = io(); // connection to server through WebSocketing
 let map; // variable that holds map obj
 let marker; // variable that holds map marker
-let sessionId;
-
-socket.on('sessionInit', (data) => {
-    sessionId = data.sessionId; // store the session ID
-});
 
 function initMap() {
     // the style of the map (Google Maps API)
@@ -152,6 +147,12 @@ function updateLocation() {
         });
     }
 }
+
+
+socket.on('lightIntensityUpdate', (data) => {
+    document.getElementById('lightIntensity').textContent = `Light Intensity: ${data.lux} lx`;
+});
+
 
 // click-evet listener to the save button to save .csv
 document.getElementById('saveButton').addEventListener('click', () => {
