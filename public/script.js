@@ -1,6 +1,6 @@
 ﻿const socket = io(); // Connection to server through WebSocket
-let map; // Variable that holds map object
-let marker; // Variable that holds map marker
+let map;
+let marker;
 
 function initMap() {
     const blackWhiteStyle = [
@@ -79,10 +79,8 @@ function initMap() {
             stylers: [{ color: '#9e9e9e' }],
         },
     ];
-
-    // initialize + apply style from above
     map = new google.maps.Map(document.getElementById("map"), {
-        center: { lat: 41.390205, lng: 2.154007 }, // Default center
+        center: { lat: 41.390205, lng: 2.154007 },
         zoom: 18,
         styles: blackWhiteStyle,
     });
@@ -102,12 +100,7 @@ function initMap() {
 function updateLocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition((position) => {
-            const pos = {
-                lat: position.coords.latitude,
-                lng: position.coords.longitude,
-            };
-
-            // Marker style
+            const pos = { lat: position.coords.latitude, lng: position.coords.longitude };
             const blackCircleIcon = {
                 path: google.maps.SymbolPath.CIRCLE,
                 scale: 7,
@@ -118,47 +111,35 @@ function updateLocation() {
             };
 
             if (!marker) {
-                marker = new google.maps.Marker({
-                    position: pos,
-                    map: map,
-                    icon: blackCircleIcon,
-                });
+                marker = new google.maps.Marker({ position: pos, map: map, icon: blackCircleIcon });
             } else {
                 marker.setPosition(pos);
                 marker.setIcon(blackCircleIcon);
             }
 
-            // Remove loading overlay
             const overlay = document.getElementById('overlay');
             overlay.style.opacity = '0';
-            overlay.addEventListener('transitionend', () => overlay.style.display = 'none', { once: true });
-
+            overlay.addEventListener('transitionend', function () { overlay.style.display = 'none'; }, { once: true });
             map.setCenter(pos);
-
-            // Emit location update to server
-            socket.emit('locationUpdate', { latitude: pos.lat, longitude: pos.lng });
         });
-    } else {
-        console.error("Geolocation is not supported by this browser.");
     }
 }
 
 document.getElementById('saveButton').addEventListener('click', () => {
-    const thingSpeakChannelId = 2435543; // Replace with your actual ThingSpeak Channel ID
-    const apiKey = 'RKJ773VUWA0MM5GF'; // Optional: Include only if your channel is private
-
-    // Construct the URL for CSV download
-    let downloadUrl = `https://api.thingspeak.com/channels/${thingSpeakChannelId}/feeds.csv?api_key=${apiKey}&results=8000`;
-
-    // Create a temporary link to programmatically click for download
-    const tempLink = document.createElement('a');
-    tempLink.href = downloadUrl;
-    tempLink.setAttribute('download', `channel_${thingSpeakChannelId}_data.csv`);
-    document.body.appendChild(tempLink);
-    tempLink.click();
-    document.body.removeChild(tempLink);
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition((position) => {
+            const datetime = new Date().toISOString();
+            socket.emit('locationUpdate', {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+                datetime: datetime
+            });
+            alert('Location data sent to server.');
+        });
+    } else {
+        alert('Geolocation is not supported by this browser.');
+    }
 });
 
-// Initialize map and set interval for location updates
 initMap();
-setInterval(updateLocation, 3000); // Update location every 3 seconds
+setInterval(updateLocation, 3000);

@@ -29,20 +29,23 @@ const thingSpeakWriteAPIKey = 'RKJ773VUWA0MM5GF';
 // Listen for new connections on WebSocket
 io.on('connection', (socket) => {
     console.log('A user connected');
-    // Generate a unique session id using UUID
-    const sessionId = require('uuid').v4();
-    // Send session id to the connected client
-    socket.emit('sessionInit', { sessionId });
 
-    // Listen for location updates from the client
     socket.on('locationUpdate', (data) => {
-        console.log(data);
+        console.log('Location data received:', data);
+        // Prepare the HTTP request to ThingSpeak
+        const thingSpeakUrl = `https://api.thingspeak.com/update`;
+        const thingSpeakParams = new URLSearchParams({
+            api_key: thingSpeakWriteAPIKey, // Use the Write API Key here
+            field1: data.latitude,
+            field2: data.longitude,
+            field3: data.datetime,
+            // Add more fields if necessary
+        });
 
-        // Send data to ThingSpeak using a GET request
-        const url = `https://api.thingspeak.com/update?api_key=${thingSpeakWriteAPIKey}&field1=${data.latitude}&field2=${data.longitude}`;
-        axios.get(url)
-            .then(() => console.log('Data sent to ThingSpeak successfully.'))
-            .catch((error) => console.error('Error sending data to ThingSpeak:', error));
+        // Send data to ThingSpeak
+        axios.get(`${thingSpeakUrl}?${thingSpeakParams.toString()}`)
+            .then(response => console.log('Data sent to ThingSpeak:', response.data))
+            .catch(error => console.error('Error sending data to ThingSpeak:', error));
     });
 });
 
