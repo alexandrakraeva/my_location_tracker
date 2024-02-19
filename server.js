@@ -11,6 +11,8 @@ const app = express();
 // create http server with express
 const server = http.createServer(app);
 
+const io = socketIo(server); 
+
 // initialize firebase + project credentials
 const serviceAccount = require('./xref-location-tracker-firebase-adminsdk-9hsrk-a1c6fe5af5.json');
 admin.initializeApp({
