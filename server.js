@@ -1,6 +1,6 @@
 ﻿const express = require('express'); // framework to create server
 const http = require('http'); //moule to create http server
-const bodyParser = require('body-parser');
+
 const socketIo = require('socket.io'); // websocketing
 const admin = require('firebase-admin'); //firebase servises - database
 const path = require('path'); // to transform file path
@@ -8,7 +8,6 @@ const { Parser } = require('json2csv'); // convert json to csv to save
 
 // initialize express app
 const app = express();
-app.use(bodyParser.json());
 
 // create http server with express
 const server = http.createServer(app);
@@ -24,7 +23,6 @@ const db = admin.firestore();
 
 // define the prot to listen on (for Heroku)
 const port = process.env.PORT || 3000;
-
 // start the server
 server.listen(port, () => {
     console.log(`Server running on port ${port}`);
@@ -62,30 +60,6 @@ io.on('connection', (socket) => {
     });
 });
 
-app.post('/sensorData', (req, res) => {
-    console.log('Received sensor data via HTTP POST:', req.body);
-    const sessionId = req.body.sessionId; // Expecting sessionId to be part of the POST data
-
-    if (!sessionId || !sessionCounters[sessionId]) {
-        return res.status(400).send({ success: false, message: 'Invalid or missing sessionId' });
-    }
-
-    let sensorDataId = sessionCounters[sessionId]++; // Use the same session counter for sensor data
-
-    db.collection(sessionId).doc(`sensorData-${sensorDataId}`).set({
-        lux: req.body.lux,
-        timestamp: admin.firestore.FieldValue.serverTimestamp()
-    })
-        .then(docRef => {
-            console.log(`Sensor data added with ID: sensorData-${sensorDataId}`);
-            res.send({ success: true });
-        })
-        .catch(error => {
-            console.error('Error adding document:', error);
-            res.status(500).send({ success: false, error: error.toString() });
-        });
-});
-
 // Route for downloading the CSV file
 app.get('/download-csv', async (req, res) => {
     const sessionId = req.query.sessionId;
@@ -94,25 +68,25 @@ app.get('/download-csv', async (req, res) => {
     }
 
     try {
-        const collectionRef = db.collection(sessionId);
-        const snapshot = await collectionRef.orderBy('timestamp').get();
+        const locationsCollection = db.collection(sessionId);
+        const snapshot = await locationsCollection.orderBy('timestamp').get(); // Ensure locations are ordered by timestamp
 
         if (snapshot.empty) {
-            return res.status(404).send('No data found for this session');
+            console.log('No matching documents.');
+            return res.status(404).send('No locations found for this session');
         }
 
-        // Transform the data to match the desired CSV structure
-        const locations = snapshot.docs.map(doc => {
-            const data = doc.data();
-            return {
-                id: doc.id,
-                latitude: data.latitude, // Assuming latitude is stored in the document
-                longitude: data.longitude, // Assuming longitude is stored in the document
-                timestamp: data.timestamp ? data.timestamp.toDate().toISOString() : null // Format timestamp
-            };
+        const locations = [];
+        snapshot.forEach(doc => {
+            let data = doc.data();
+            data.id = doc.id; // Use Firestore document ID as the location ID
+            if (data.timestamp) {
+                const timestampDate = data.timestamp.toDate();
+                data.timestamp = timestampDate.toISOString();
+            }
+            locations.push(data);
         });
 
-        // Define the fields to be included in the CSV
         const fields = ['id', 'latitude', 'longitude', 'timestamp'];
         const json2csvParser = new Parser({ fields });
         const csv = json2csvParser.parse(locations);
