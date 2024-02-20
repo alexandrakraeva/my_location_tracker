@@ -12,10 +12,10 @@ const app = express();
 // create http server with express
 const server = http.createServer(app);
 
-const io = socketIo(server); 
+const io = socketIo(server);
 
 // initialize firebase + project credentials
-const serviceAccount = require('./xref-lux-values-firebase-adminsdk-puayh-d190ccc1e1.json');
+const serviceAccount = require('./xref-location-tracker-firebase-adminsdk-9hsrk-a1c6fe5af5.json');
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
 });
@@ -41,24 +41,63 @@ io.on('connection', (socket) => {
 
     sessionCounters[sessionId] = 0; // Initialize the counter for this session
 
-    // Listen for lux value updates instead of location updates
-    socket.on('luxUpdate', (data) => {
+    socket.on('locationUpdate', (data) => {
         console.log(data);
 
-        let luxId = sessionCounters[sessionId]++; // Increment the session counter for sequential IDs
+        let locationId = sessionCounters[sessionId]++; // Increment the session counter for sequential IDs
 
-        const luxCollection = db.collection(sessionId);
-        luxCollection.doc(luxId.toString()).set({
-            lux: data.lux,
+        const locationsCollection = db.collection(sessionId);
+        locationsCollection.doc(locationId.toString()).set({
+            ...data,
             timestamp: admin.firestore.FieldValue.serverTimestamp()
         })
-            .then(() => console.log('Lux data was added to Firestore successfully.'))
+            .then(() => console.log('Data was added to Firestore successfully.'))
             .catch((error) => console.error('Error adding document to Firestore:', error));
     });
 
     socket.on('disconnect', () => {
         delete sessionCounters[sessionId]; // Clean up the session counter when the user disconnects
     });
+});
+
+// Route for downloading the CSV file
+app.get('/download-csv', async (req, res) => {
+    const sessionId = req.query.sessionId;
+    if (!sessionId) {
+        return res.status(400).send('Session ID is required');
+    }
+
+    try {
+        const locationsCollection = db.collection(sessionId);
+        const snapshot = await locationsCollection.orderBy('timestamp').get(); // Ensure locations are ordered by timestamp
+
+        if (snapshot.empty) {
+            console.log('No matching documents.');
+            return res.status(404).send('No locations found for this session');
+        }
+
+        const locations = [];
+        snapshot.forEach(doc => {
+            let data = doc.data();
+            data.id = doc.id; // Use Firestore document ID as the location ID
+            if (data.timestamp) {
+                const timestampDate = data.timestamp.toDate();
+                data.timestamp = timestampDate.toISOString();
+            }
+            locations.push(data);
+        });
+
+        const fields = ['id', 'latitude', 'longitude', 'timestamp'];
+        const json2csvParser = new Parser({ fields });
+        const csv = json2csvParser.parse(locations);
+
+        res.header('Content-Type', 'text/csv');
+        res.attachment('locations.csv');
+        return res.send(csv);
+    } catch (error) {
+        console.error('Error fetching data from Firestore:', error);
+        res.status(500).send('Error generating CSV file');
+    }
 });
 
 // Serve the main page for any other route not handled above
