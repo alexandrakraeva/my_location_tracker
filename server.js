@@ -100,6 +100,30 @@ app.get('/download-csv', async (req, res) => {
     }
 });
 
+app.get('/updateLux', (req, res) => {
+    const luxValue = req.query.lux; // Extract the lux value from query parameters
+    if (!luxValue) {
+        return res.status(400).send('Lux value is required');
+    }
+
+    console.log(`Received lux value: ${luxValue}`);
+
+    const luxCollection = db.collection('lux');
+    luxCollection.add({
+        value: parseFloat(luxValue), // Ensure the lux value is stored as a float
+        timestamp: admin.firestore.FieldValue.serverTimestamp() // Add a server timestamp for when the data was received
+    })
+        .then(docRef => {
+            console.log(`Document written with ID: ${docRef.id}`);
+            res.send(`Lux value updated with ID: ${docRef.id}`);
+        })
+        .catch(error => {
+            console.error("Error adding document: ", error);
+            res.status(500).send("Error storing lux value");
+        });
+});
+
+
 // Serve the main page for any other route not handled above
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
