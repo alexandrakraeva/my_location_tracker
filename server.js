@@ -15,7 +15,7 @@ const server = http.createServer(app);
 const io = socketIo(server); 
 
 // initialize firebase + project credentials
-const serviceAccount = require('./xref-location-tracker-firebase-adminsdk-9hsrk-a1c6fe5af5.json');
+const serviceAccount = require('./xref-lux-values-firebase-adminsdk-puayh-d190ccc1e1.json');
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
 });
@@ -32,7 +32,7 @@ server.listen(port, () => {
 app.use(express.static('public'));
 
 // to maintain session counters
-let sessionCounters = {}; 
+let sessionCounters = {};
 
 io.on('connection', (socket) => {
     console.log('A user connected');
@@ -41,17 +41,18 @@ io.on('connection', (socket) => {
 
     sessionCounters[sessionId] = 0; // Initialize the counter for this session
 
-    socket.on('locationUpdate', (data) => {
+    // Listen for lux value updates instead of location updates
+    socket.on('luxUpdate', (data) => {
         console.log(data);
 
-        let locationId = sessionCounters[sessionId]++; // Increment the session counter for sequential IDs
+        let luxId = sessionCounters[sessionId]++; // Increment the session counter for sequential IDs
 
-        const locationsCollection = db.collection(sessionId);
-        locationsCollection.doc(locationId.toString()).set({
-            ...data,
+        const luxCollection = db.collection(sessionId);
+        luxCollection.doc(luxId.toString()).set({
+            lux: data.lux,
             timestamp: admin.firestore.FieldValue.serverTimestamp()
         })
-            .then(() => console.log('Data was added to Firestore successfully.'))
+            .then(() => console.log('Lux data was added to Firestore successfully.'))
             .catch((error) => console.error('Error adding document to Firestore:', error));
     });
 
@@ -59,70 +60,6 @@ io.on('connection', (socket) => {
         delete sessionCounters[sessionId]; // Clean up the session counter when the user disconnects
     });
 });
-
-// Route for downloading the CSV file
-app.get('/download-csv', async (req, res) => {
-    const sessionId = req.query.sessionId;
-    if (!sessionId) {
-        return res.status(400).send('Session ID is required');
-    }
-
-    try {
-        const locationsCollection = db.collection(sessionId);
-        const snapshot = await locationsCollection.orderBy('timestamp').get(); // Ensure locations are ordered by timestamp
-
-        if (snapshot.empty) {
-            console.log('No matching documents.');
-            return res.status(404).send('No locations found for this session');
-        }
-
-        const locations = [];
-        snapshot.forEach(doc => {
-            let data = doc.data();
-            data.id = doc.id; // Use Firestore document ID as the location ID
-            if (data.timestamp) {
-                const timestampDate = data.timestamp.toDate();
-                data.timestamp = timestampDate.toISOString();
-            }
-            locations.push(data);
-        });
-
-        const fields = ['id', 'latitude', 'longitude', 'timestamp'];
-        const json2csvParser = new Parser({ fields });
-        const csv = json2csvParser.parse(locations);
-
-        res.header('Content-Type', 'text/csv');
-        res.attachment('locations.csv');
-        return res.send(csv);
-    } catch (error) {
-        console.error('Error fetching data from Firestore:', error);
-        res.status(500).send('Error generating CSV file');
-    }
-});
-
-app.get('/updateLux', (req, res) => {
-    const luxValue = req.query.lux; // Extract the lux value from query parameters
-    if (!luxValue) {
-        return res.status(400).send('Lux value is required');
-    }
-
-    console.log(`Received lux value: ${luxValue}`);
-
-    const luxCollection = db.collection('lux');
-    luxCollection.add({
-        value: parseFloat(luxValue), // Ensure the lux value is stored as a float
-        timestamp: admin.firestore.FieldValue.serverTimestamp() // Add a server timestamp for when the data was received
-    })
-        .then(docRef => {
-            console.log(`Document written with ID: ${docRef.id}`);
-            res.send(`Lux value updated with ID: ${docRef.id}`);
-        })
-        .catch(error => {
-            console.error("Error adding document: ", error);
-            res.status(500).send("Error storing lux value");
-        });
-});
-
 
 // Serve the main page for any other route not handled above
 app.get('*', (req, res) => {
