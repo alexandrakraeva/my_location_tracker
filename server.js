@@ -14,7 +14,7 @@ const server = http.createServer(app);
 const io = socketIo(server);
 
 // Firebase Admin SDK initialization
-const serviceAccount = require('./path-to-your-firebase-adminsdk.json');
+const serviceAccount = require('./xref-lux-values-firebase-adminsdk-puayh-d190ccc1e1.json');
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
 });
