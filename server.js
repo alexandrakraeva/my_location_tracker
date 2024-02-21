@@ -35,22 +35,20 @@ app.use(express.static('public'));
 
 // to maintain session counters for each user session
 let sessionCounters = {};
-// Start session IDs from 1
-let globalSessionId = 1; 
 
 io.on('connection', (socket) => {
     console.log('A user connected');
     // generate new session ID for each connection
-    const sessionId = globalSessionId++;
-    socket.emit(sessionId, { sessionId: sessionId.toString() });
+    const sessionId = require('uuid').v4();
+    socket.emit('sessionInit', { sessionId });
     // Initialize the counter for this session
-    sessionCounters[sessionId] = 0; 
+    sessionCounters[sessionId] = 0;
 
     // listen for th elocation updates from client side
     socket.on('locationUpdate', (data) => {
         console.log(data);
         // generate a unique location ID for this session
-        let locationId = sessionCounters[sessionId]++; 
+        let locationId = sessionCounters[sessionId]++;
         // reference which collection to save locatations to in firebase
         const locationsCollection = db.collection(sessionId);
         // add received location data to firebase, using location ID as document ID
@@ -66,7 +64,7 @@ io.on('connection', (socket) => {
     // listen for disconnect events
     socket.on('disconnect', () => {
         // Clean up the session counter when the user disconnects
-        delete sessionCounters[sessionId]; 
+        delete sessionCounters[sessionId];
     });
 });
 
