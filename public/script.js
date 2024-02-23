@@ -8,7 +8,7 @@ socket.on('sessionInit', (data) => {
 });
 
 socket.on('lux', function (data) {
-    document.getElementById('luxValue').textContent = `Lux: ${data.value}`;
+    document.getElementById('luxValue').textContent = `LUX: ${data.value}`;
 });
 
 function initMap() {
