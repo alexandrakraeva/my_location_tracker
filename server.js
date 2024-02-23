@@ -1,4 +1,6 @@
-﻿const express = require('express'); // framework to create server
+﻿require('dotenv').config();
+
+const express = require('express'); // framework to create server
 const http = require('http'); //moule to create http server
 const socketIo = require('socket.io'); // websocketing
 const admin = require('firebase-admin'); //firebase servises - database
@@ -29,6 +31,17 @@ server.listen(port, () => {
 
 // index.html, styles.css, script.js files from 'public' directory
 app.use(express.static('public'));
+
+
+
+app.get('/api/google-key', (req, res) => {
+    res.json({ key: process.env.GOOGLE_API_KEY });
+});
+
+
+
+
+
 
 // to maintain session counters
 let sessionCounters = {};

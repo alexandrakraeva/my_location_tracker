@@ -15,6 +15,8 @@ socket.on('lux', function (data) {
     currentLuxValue = data.value; // Update the current lux value
 });
 
+
+fetch('/api/google-key').then(response => response.json()).then(data => {
 function initMap() {
     // the style of the map (Google Maps API)
     const blackWhiteStyle = [
@@ -108,11 +110,13 @@ function initMap() {
         mapTypeControl: false,
         fullscreenControl: false
     });
+  
 
     // target HTML to display "Loading..." first
     const overlay = document.getElementById('overlay');
     overlay.innerHTML = '<div class="loading-spinner"></div><div class="loading-text">Loading...</div>';
 }
+});
 
 
 function updateLocation() {
