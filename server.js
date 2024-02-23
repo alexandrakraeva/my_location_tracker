@@ -1,4 +1,5 @@
-﻿require('dotenv').config();
+﻿require('dotenv').config({ path: '.env' });
+console.log(process.env.GOOGLE_MAPS_API_KEY);
 
 const fs = require('fs'); // to read html and replace placeholders with apis
 const express = require('express'); // framework to create server
@@ -44,7 +45,7 @@ app.get('/', (req, res) => {
             return res.status(500).send('An error occurred');
         }
         console.log("API Key from .env: ", process.env.GOOGLE_MAPS_API_KEY); // Debug line
-        const result = data.replace('YOUR_API_KEY_PLACEHOLDER', process.env.GOOGLE_MAPS_API_KEY);
+        const result = data.replace('GOOGLE_MAPS_API_KEY_PLACEHOLDER', process.env.GOOGLE_MAPS_API_KEY);
         res.send(result);
     });
 });
