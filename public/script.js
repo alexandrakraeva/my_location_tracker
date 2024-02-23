@@ -2,15 +2,16 @@
 let map; // variable that holds map obj
 let marker; // variable that holds map marker
 let sessionId;
+let currentLuxValue = 0;
 
 socket.on('sessionInit', (data) => {
     sessionId = data.sessionId; // store the session ID
 });
 
+
 socket.on('lux', function (data) {
     document.getElementById('luxValue').textContent = `LUX: ${data.value}`;
-    // Emit an event to the server with the lux value
-    socket.emit('luxUpdate', { value: data.value, sessionId: sessionId });
+    currentLuxValue = data.value; // Update the current lux value
 });
 
 function initMap() {
@@ -119,6 +120,7 @@ function updateLocation() {
             const pos = {
                 lat: position.coords.latitude,
                 lng: position.coords.longitude,
+                lux: currentLuxValue,
             };
 
             // define style of Location Marker
@@ -152,9 +154,7 @@ function updateLocation() {
             }, { once: true });
 
             map.setCenter(pos);
-            socket.emit('locationUpdate', { latitude: pos.lat, longitude: pos.lng });
-
-
+            socket.emit('locationUpdate', { ...pos, sessionId: sessionId });
         });
     }
 }

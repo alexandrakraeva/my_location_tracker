@@ -49,30 +49,16 @@ io.on('connection', (socket) => {
     sessionCounters[sessionId] = 0; // Initialize the counter for this session
 
 
-    socket.on('luxUpdate', (data) => {
-        console.log(`Lux value received: ${data.value}`);
-
-        // Save the lux value to Firestore, associated with the current session and location
-        const luxCollection = db.collection(data.sessionId).doc('LuxValues');
-        luxCollection.set({
-            [admin.firestore.FieldValue.serverTimestamp().toString()]: data.value
-        }, { merge: true })
-            .then(() => console.log('Lux value added to Firestore successfully.'))
-            .catch((error) => console.error('Error adding lux value to Firestore:', error));
-    });
-
-
     socket.on('locationUpdate', (data) => {
-        console.log(data);
-
-        let locationId = sessionCounters[sessionId]++; // Increment the session counter for sequential IDs
-
-        const locationsCollection = db.collection(sessionId);
-        locationsCollection.doc(locationId.toString()).set({
-            ...data,
+        let updateId = sessionCounters[sessionId]++;
+        const updatesCollection = db.collection(sessionId);
+        updatesCollection.doc(updateId.toString()).set({
+            latitude: data.lat,
+            longitude: data.lng,
+            lux: data.lux,
             timestamp: admin.firestore.FieldValue.serverTimestamp()
         })
-            .then(() => console.log('Data was added to Firestore successfully.'))
+            .then(() => console.log('Location and lux data added to Firestore successfully.'))
             .catch((error) => console.error('Error adding document to Firestore:', error));
     });
 
@@ -99,28 +85,26 @@ app.get('/download-csv', async (req, res) => {
     }
 
     try {
-        const locationsCollection = db.collection(sessionId);
-        const snapshot = await locationsCollection.orderBy('timestamp').get(); // Ensure locations are ordered by timestamp
+        const updatesCollection = db.collection(sessionId);
+        const snapshot = await updatesCollection.orderBy('timestamp').get();
 
         if (snapshot.empty) {
-            console.log('No matching documents.');
-            return res.status(404).send('No locations found for this session');
+            return res.status(404).send('No data found for this session');
         }
 
-        const locations = [];
+        const updates = [];
         snapshot.forEach(doc => {
             let data = doc.data();
-            data.id = doc.id; // Use Firestore document ID as the location ID
+            data.id = doc.id;
             if (data.timestamp) {
-                const timestampDate = data.timestamp.toDate();
-                data.timestamp = timestampDate.toISOString();
+                data.timestamp = data.timestamp.toDate().toISOString();
             }
-            locations.push(data);
+            updates.push(data);
         });
 
-        const fields = ['id', 'latitude', 'longitude', 'timestamp'];
+        const fields = ['id', 'latitude', 'longitude', 'lux', 'timestamp'];
         const json2csvParser = new Parser({ fields });
-        const csv = json2csvParser.parse(locations);
+        const csv = json2csvParser.parse(updates);
 
         res.header('Content-Type', 'text/csv');
         res.attachment('locations.csv');
