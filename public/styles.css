@@ -53,13 +53,14 @@
 
 #map {
     margin-top: 20px;
-    height: 80vh;
+    height: 85vh;
     width: 55vh;
 }
 
 
 #saveButton {
     width: 55vh;
+    width: 15vh;
     margin-top: 15px;
     padding: 10px 0;
     background-color: black;
