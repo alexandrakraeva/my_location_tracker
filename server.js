@@ -60,12 +60,7 @@ io.on('connection', (socket) => {
     });
 });
 
-app.get('/updateLux', (req, res) => {
-    const lux = req.query.lux;
-    console.log(`Lux value received: ${lux}`);
-    io.emit('lux', { value: lux });
-    res.sendStatus(200);
-});
+
 
 // Route for downloading the CSV file
 app.get('/download-csv', async (req, res) => {

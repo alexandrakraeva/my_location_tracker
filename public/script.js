@@ -107,6 +107,14 @@ function initMap() {
 }
 
 
+app.get('/updateLux', (req, res) => {
+    const lux = req.query.lux; // Get the lux value from the query string
+    console.log(`Lux value received: ${lux}`);
+    io.emit('lux', { value: lux }); // Emit the lux value to all connected WebSocket clients
+    res.sendStatus(200);
+});
+
+
 function updateLocation() {
     if (navigator.geolocation) { // check if browser supports geolocation
         navigator.geolocation.getCurrentPosition((position) => {
