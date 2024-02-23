@@ -1,19 +1,17 @@
-﻿const socket = io(); // connection to server through WebSocketing
-let map; // variable that holds map obj
-let marker; // variable that holds map marker
+﻿const socket = io(); // Connection to server through WebSocket
+let map; // Variable that holds the map object
+let marker; // Variable that holds the map marker
 let sessionId;
 let currentLuxValue = 0;
 
 socket.on('sessionInit', (data) => {
-    sessionId = data.sessionId; // store the session ID
+    sessionId = data.sessionId; // Store the session ID
 });
-
 
 socket.on('lux', function (data) {
     document.getElementById('luxValue').textContent = `LUX: ${data.value}`;
     currentLuxValue = data.value; // Update the current lux value
 });
-
 
 // Dynamically load the Google Maps script after fetching the API key
 function loadGoogleMaps(apiKey) {
@@ -31,7 +29,7 @@ fetch('/api/google-key')
         loadGoogleMaps(data.key);
     })
     .catch(error => console.error('Failed to load Google Maps:', error));
-    
+
 
 
 function initMap() {
