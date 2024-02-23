@@ -1,4 +1,4 @@
-﻿require('dotenv').config();
+﻿
 const express = require('express'); // framework to create server
 const http = require('http'); //moule to create http server
 const socketIo = require('socket.io'); // websocketing
