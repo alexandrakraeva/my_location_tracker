@@ -1,6 +1,5 @@
 ﻿const express = require('express'); // framework to create server
 const http = require('http'); //moule to create http server
-
 const socketIo = require('socket.io'); // websocketing
 const admin = require('firebase-admin'); //firebase servises - database
 const path = require('path'); // to transform file path
@@ -34,13 +33,6 @@ app.use(express.static('public'));
 // to maintain session counters
 let sessionCounters = {};
 
-
-
-
-
-
-
-
 io.on('connection', (socket) => {
     console.log('A user connected');
     const sessionId = require('uuid').v4();
@@ -67,15 +59,12 @@ io.on('connection', (socket) => {
     });
 });
 
-
 // Endpoint for updating lux values (specific to Project 1)
 app.get('/updateLux', (req, res) => {
     const lux = req.query.lux;
     io.emit('lux', { value: lux });
     res.sendStatus(200);
 });
-
-
 
 // Route for downloading the CSV file
 app.get('/download-csv', async (req, res) => {
