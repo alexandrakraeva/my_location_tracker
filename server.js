@@ -32,16 +32,10 @@ server.listen(port, () => {
 // index.html, styles.css, script.js files from 'public' directory
 app.use(express.static('public'));
 
-
-
+// Endpoint to provide the Google API key to the client
 app.get('/api/google-key', (req, res) => {
     res.json({ key: process.env.GOOGLE_API_KEY });
 });
-
-
-
-
-
 
 // to maintain session counters
 let sessionCounters = {};

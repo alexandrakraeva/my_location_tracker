@@ -1,5 +1,4 @@
-﻿
-const socket = io(); // connection to server through WebSocketing
+﻿const socket = io(); // connection to server through WebSocketing
 let map; // variable that holds map obj
 let marker; // variable that holds map marker
 let sessionId;
@@ -16,7 +15,25 @@ socket.on('lux', function (data) {
 });
 
 
-fetch('/api/google-key').then(response => response.json()).then(data => {
+// Dynamically load the Google Maps script after fetching the API key
+function loadGoogleMaps(apiKey) {
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMap`;
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
+}
+
+// Fetch the API key from the server and load the Google Maps script
+fetch('/api/google-key')
+    .then(response => response.json())
+    .then(data => {
+        loadGoogleMaps(data.key);
+    })
+    .catch(error => console.error('Failed to load Google Maps:', error));
+    
+
+
 function initMap() {
     // the style of the map (Google Maps API)
     const blackWhiteStyle = [
@@ -110,13 +127,11 @@ function initMap() {
         mapTypeControl: false,
         fullscreenControl: false
     });
-  
 
     // target HTML to display "Loading..." first
     const overlay = document.getElementById('overlay');
     overlay.innerHTML = '<div class="loading-spinner"></div><div class="loading-text">Loading...</div>';
 }
-});
 
 
 function updateLocation() {
