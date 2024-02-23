@@ -34,12 +34,26 @@ app.use(express.static('public'));
 // to maintain session counters
 let sessionCounters = {};
 
+
+
+
+
+
+
+
 io.on('connection', (socket) => {
     console.log('A user connected');
     const sessionId = require('uuid').v4();
     socket.emit('sessionInit', { sessionId });
 
     sessionCounters[sessionId] = 0; // Initialize the counter for this session
+
+
+    socket.on('luxUpdate', (data) => {
+        console.log(`Lux value received: ${data.value}`);
+        io.emit('lux', { value: data.value });
+    });
+
 
     socket.on('locationUpdate', (data) => {
         console.log(data);
@@ -58,6 +72,14 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         delete sessionCounters[sessionId]; // Clean up the session counter when the user disconnects
     });
+});
+
+
+// Endpoint for updating lux values (specific to Project 1)
+app.get('/updateLux', (req, res) => {
+    const lux = req.query.lux;
+    io.emit('lux', { value: lux });
+    res.sendStatus(200);
 });
 
 

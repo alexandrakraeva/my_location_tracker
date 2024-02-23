@@ -7,6 +7,10 @@ socket.on('sessionInit', (data) => {
     sessionId = data.sessionId; // store the session ID
 });
 
+socket.on('lux', function (data) {
+    document.getElementById('luxValue').textContent = `Lux: ${data.value}`;
+});
+
 function initMap() {
     // the style of the map (Google Maps API)
     const blackWhiteStyle = [
@@ -106,6 +110,7 @@ function initMap() {
     overlay.innerHTML = '<div class="loading-spinner"></div><div class="loading-text">Loading...</div>';
 }
 
+
 function updateLocation() {
     if (navigator.geolocation) { // check if browser supports geolocation
         navigator.geolocation.getCurrentPosition((position) => {
@@ -151,13 +156,6 @@ function updateLocation() {
         });
     }
 }
-
-app.get('/updateLux', (req, res) => {
-    const lux = req.query.lux; // Get the lux value from the query string
-    console.log(`Lux value received: ${lux}`);
-    io.emit('lux', { value: lux }); // Emit the lux value to all connected WebSocket clients
-    res.sendStatus(200);
-});
 
 // click-evet listener to the save button to save .csv
 document.getElementById('saveButton').addEventListener('click', () => {
