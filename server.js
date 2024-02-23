@@ -1,43 +1,52 @@
-﻿const express = require('express');
-const http = require('http');
-const socketIo = require('socket.io');
-const admin = require('firebase-admin');
-const path = require('path');
-const { Parser } = require('json2csv');
-const { v4: uuidv4 } = require('uuid');
+﻿server.js
+const express = require('express'); // framework to create server
+const http = require('http'); //moule to create http server
 
-// Initialize Express app and create an HTTP server
+const socketIo = require('socket.io'); // websocketing
+const admin = require('firebase-admin'); //firebase servises - database
+const path = require('path'); // to transform file path
+const { Parser } = require('json2csv'); // convert json to csv to save
+
+// initialize express app
 const app = express();
+
+// create http server with express
 const server = http.createServer(app);
 
-// Initialize Socket.IO with the HTTP server
 const io = socketIo(server);
 
-// Firebase Admin SDK initialization
-const serviceAccount = require('./xref-lux-values-firebase-adminsdk-puayh-d190ccc1e1.json'); 
+// initialize firebase + project credentials
+const serviceAccount = require('./xref-location-tracker-firebase-adminsdk-9hsrk-a1c6fe5af5.json');
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
 });
 const db = admin.firestore();
 
-// Middleware
-app.use(express.json());
+// define the prot to listen on (for Heroku)
+const port = process.env.PORT || 3000;
+// start the server
+server.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+});
+
+// index.html, styles.css, script.js files from 'public' directory
 app.use(express.static('public'));
 
-// Port configuration
-const PORT = process.env.PORT || 3000;
-
-// Session counters for WebSocket sessions
+// to maintain session counters
 let sessionCounters = {};
 
 io.on('connection', (socket) => {
     console.log('A user connected');
-    const sessionId = uuidv4();
+    const sessionId = require('uuid').v4();
     socket.emit('sessionInit', { sessionId });
-    sessionCounters[sessionId] = 0;
+
+    sessionCounters[sessionId] = 0; // Initialize the counter for this session
 
     socket.on('locationUpdate', (data) => {
-        let locationId = sessionCounters[sessionId]++;
+        console.log(data);
+
+        let locationId = sessionCounters[sessionId]++; // Increment the session counter for sequential IDs
+
         const locationsCollection = db.collection(sessionId);
         locationsCollection.doc(locationId.toString()).set({
             ...data,
@@ -48,41 +57,60 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => {
-        delete sessionCounters[sessionId];
+        delete sessionCounters[sessionId]; // Clean up the session counter when the user disconnects
     });
 });
 
-// Endpoint for sending light value and lux value
-app.post('/send-data', async (req, res) => {
-    const { lightValue, lux, latitude, longitude } = req.body;
-    console.log(`Received data - Light: ${lightValue}, Lux: ${lux}, Latitude: ${latitude}, Longitude: ${longitude}`);
 
-    const docRef = db.collection('sensorData').doc();
-    await docRef.set({
-        lightValue,
-        lux,
-        latitude,
-        longitude,
-        timestamp: admin.firestore.FieldValue.serverTimestamp()
-    });
-
-    res.status(200).send('Data received and stored in Firebase');
+app.get('/updateLux', (req, res) => {
+    const lux = req.query.lux; // Get the lux value from the query string
+    console.log(`Lux value received: ${lux}`);
+    io.emit('lux', { value: lux }); // Emit the lux value to all connected WebSocket clients
+    res.sendStatus(200);
 });
 
-// Endpoint to retrieve sensor data
-app.get('/sensor-data', async (req, res) => {
-    const snapshot = await db.collection('sensorData').orderBy('timestamp').get();
-    const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-    res.status(200).json(data);
+// Route for downloading the CSV file
+app.get('/download-csv', async (req, res) => {
+    const sessionId = req.query.sessionId;
+    if (!sessionId) {
+        return res.status(400).send('Session ID is required');
+    }
+
+    try {
+        const locationsCollection = db.collection(sessionId);
+        const snapshot = await locationsCollection.orderBy('timestamp').get(); // Ensure locations are ordered by timestamp
+
+        if (snapshot.empty) {
+            console.log('No matching documents.');
+            return res.status(404).send('No locations found for this session');
+        }
+
+        const locations = [];
+        snapshot.forEach(doc => {
+            let data = doc.data();
+            data.id = doc.id; // Use Firestore document ID as the location ID
+            if (data.timestamp) {
+                const timestampDate = data.timestamp.toDate();
+                data.timestamp = timestampDate.toISOString();
+            }
+            locations.push(data);
+        });
+
+        const fields = ['id', 'latitude', 'longitude', 'timestamp'];
+        const json2csvParser = new Parser({ fields });
+        const csv = json2csvParser.parse(locations);
+
+        res.header('Content-Type', 'text/csv');
+        res.attachment('locations.csv');
+        return res.send(csv);
+    } catch (error) {
+        console.error('Error fetching data from Firestore:', error);
+        res.status(500).send('Error generating CSV file');
+    }
 });
 
 // Serve the main page for any other route not handled above
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// Start the server
-server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
 });
