@@ -7,19 +7,6 @@ const admin = require('firebase-admin'); //firebase servises - database
 const path = require('path'); // to transform file path
 const { Parser } = require('json2csv'); // convert json to csv to save
 
-// from .env
-app.get('/', (req, res) => {
-    fs.readFile('public/index.html', 'utf8', (err, data) => {
-        if (err) {
-            console.error('Error reading index.html', err);
-            return res.status(500).send('An error occurred');
-        }
-        const result = data.replace('YOUR_API_KEY_PLACEHOLDER', process.env.GOOGLE_MAPS_API_KEY);
-        res.send(result);
-    });
-});
-
-
 
 // initialize express app
 const app = express();
@@ -45,6 +32,20 @@ server.listen(port, () => {
 
 // index.html, styles.css, script.js files from 'public' directory
 app.use(express.static('public'));
+
+
+
+// from .env
+app.get('/', (req, res) => {
+    fs.readFile('public/index.html', 'utf8', (err, data) => {
+        if (err) {
+            console.error('Error reading index.html', err);
+            return res.status(500).send('An error occurred');
+        }
+        const result = data.replace('YOUR_API_KEY_PLACEHOLDER', process.env.GOOGLE_MAPS_API_KEY);
+        res.send(result);
+    });
+});
 
 // to maintain session counters
 let sessionCounters = {};
