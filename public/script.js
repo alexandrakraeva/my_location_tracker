@@ -1,4 +1,4 @@
-﻿require('dotenv').config();
+﻿
 const socket = io(); // connection to server through WebSocketing
 let map; // variable that holds map obj
 let marker; // variable that holds map marker
