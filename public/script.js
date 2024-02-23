@@ -1,36 +1,18 @@
-﻿const socket = io(); // Connection to server through WebSocket
-let map; // Variable that holds the map object
-let marker; // Variable that holds the map marker
+﻿const socket = io(); // connection to server through WebSocketing
+let map; // variable that holds map obj
+let marker; // variable that holds map marker
 let sessionId;
 let currentLuxValue = 0;
 
 socket.on('sessionInit', (data) => {
-    sessionId = data.sessionId; // Store the session ID
+    sessionId = data.sessionId; // store the session ID
 });
+
 
 socket.on('lux', function (data) {
     document.getElementById('luxValue').textContent = `LUX: ${data.value}`;
     currentLuxValue = data.value; // Update the current lux value
 });
-
-// Dynamically load the Google Maps script after fetching the API key
-function loadGoogleMaps(apiKey) {
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&callback=initMap`;
-    script.async = true;
-    script.defer = true;
-    document.head.appendChild(script);
-}
-
-// Fetch the API key from the server and load the Google Maps script
-fetch('/api/google-key')
-    .then(response => response.json())
-    .then(data => {
-        loadGoogleMaps(data.key);
-    })
-    .catch(error => console.error('Failed to load Google Maps:', error));
-
-
 
 function initMap() {
     // the style of the map (Google Maps API)
@@ -189,4 +171,4 @@ document.getElementById('saveButton').addEventListener('click', () => {
 
 ///////
 initMap();
-setInterval(updateLocation, 3000); // updates location each 10 sec
+setInterval(updateLocation, 3000); 

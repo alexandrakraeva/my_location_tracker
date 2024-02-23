@@ -1,6 +1,4 @@
-﻿require('dotenv').config();
-
-const express = require('express'); // framework to create server
+﻿const express = require('express'); // framework to create server
 const http = require('http'); //moule to create http server
 const socketIo = require('socket.io'); // websocketing
 const admin = require('firebase-admin'); //firebase servises - database
@@ -59,12 +57,6 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         delete sessionCounters[sessionId]; // Clean up the session counter when the user disconnects
     });
-});
-
-
-// Endpoint to provide the Google API key to the client
-app.get('/api/google-key', (req, res) => {
-    res.json({ key: process.env.GOOGLE_API_KEY });
 });
 
 // Endpoint for updating lux values (specific to Project 1)
