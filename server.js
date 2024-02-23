@@ -1,10 +1,25 @@
-﻿
+﻿const fs = require('fs'); // to read html and replace placeholders with apis
+require('dotenv').config();
 const express = require('express'); // framework to create server
 const http = require('http'); //moule to create http server
 const socketIo = require('socket.io'); // websocketing
 const admin = require('firebase-admin'); //firebase servises - database
 const path = require('path'); // to transform file path
 const { Parser } = require('json2csv'); // convert json to csv to save
+
+// from .env
+app.get('/', (req, res) => {
+    fs.readFile('public/index.html', 'utf8', (err, data) => {
+        if (err) {
+            console.error('Error reading index.html', err);
+            return res.status(500).send('An error occurred');
+        }
+        const result = data.replace('YOUR_API_KEY_PLACEHOLDER', process.env.GOOGLE_MAPS_API_KEY);
+        res.send(result);
+    });
+});
+
+
 
 // initialize express app
 const app = express();
