@@ -1,5 +1,4 @@
-﻿server.js
-const express = require('express'); // framework to create server
+﻿const express = require('express'); // framework to create server
 const http = require('http'); //moule to create http server
 
 const socketIo = require('socket.io'); // websocketing
@@ -61,14 +60,12 @@ io.on('connection', (socket) => {
     });
 });
 
-
 app.get('/updateLux', (req, res) => {
-    const lux = req.query.lux; // Get the lux value from the query string
+    const lux = req.query.lux;
     console.log(`Lux value received: ${lux}`);
-    io.emit('lux', { value: lux }); // Emit the lux value to all connected WebSocket clients
+    io.emit('lux', { value: lux });
     res.sendStatus(200);
 });
-
 
 // Route for downloading the CSV file
 app.get('/download-csv', async (req, res) => {
