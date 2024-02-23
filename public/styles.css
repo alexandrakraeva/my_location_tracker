@@ -1,13 +1,13 @@
 ﻿#overlay {
     position: fixed;
-    width: 100vw;
+    width: 200vw;
     height: 100vh;
     background-color: black;
     z-index: 100;
     transition: opacity 1s ease-out;
     opacity: 1;
     display: flex;
-    justify-content: center;
+    
     align-items: center;
     flex-direction: column;
 }
