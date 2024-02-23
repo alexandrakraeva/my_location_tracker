@@ -1,5 +1,6 @@
-﻿const fs = require('fs'); // to read html and replace placeholders with apis
-require('dotenv').config();
+﻿require('dotenv').config();
+
+const fs = require('fs'); // to read html and replace placeholders with apis
 const express = require('express'); // framework to create server
 const http = require('http'); //moule to create http server
 const socketIo = require('socket.io'); // websocketing
@@ -42,6 +43,7 @@ app.get('/', (req, res) => {
             console.error('Error reading index.html', err);
             return res.status(500).send('An error occurred');
         }
+        console.log("API Key from .env: ", process.env.GOOGLE_MAPS_API_KEY); // Debug line
         const result = data.replace('YOUR_API_KEY_PLACEHOLDER', process.env.GOOGLE_MAPS_API_KEY);
         res.send(result);
     });
