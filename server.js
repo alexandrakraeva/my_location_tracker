@@ -51,7 +51,14 @@ io.on('connection', (socket) => {
 
     socket.on('luxUpdate', (data) => {
         console.log(`Lux value received: ${data.value}`);
-        io.emit('lux', { value: data.value });
+
+        // Save the lux value to Firestore, associated with the current session and location
+        const luxCollection = db.collection(data.sessionId).doc('LuxValues');
+        luxCollection.set({
+            [admin.firestore.FieldValue.serverTimestamp().toString()]: data.value
+        }, { merge: true })
+            .then(() => console.log('Lux value added to Firestore successfully.'))
+            .catch((error) => console.error('Error adding lux value to Firestore:', error));
     });
 
 

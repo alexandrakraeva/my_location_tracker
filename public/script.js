@@ -9,6 +9,8 @@ socket.on('sessionInit', (data) => {
 
 socket.on('lux', function (data) {
     document.getElementById('luxValue').textContent = `LUX: ${data.value}`;
+    // Emit an event to the server with the lux value
+    socket.emit('luxUpdate', { value: data.value, sessionId: sessionId });
 });
 
 function initMap() {
