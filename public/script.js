@@ -171,4 +171,4 @@ document.getElementById('saveButton').addEventListener('click', () => {
 
 ///////
 initMap();
-setInterval(updateLocation, 10000); // updates location each 10 sec
+setInterval(updateLocation, 3000); // updates location each 10 sec
